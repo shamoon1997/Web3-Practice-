@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+	</head>
+	<body>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"
+			integrity="sha512-dUtqwyU7CGy2STT3zZIZBIM32aHjuF5HGqT6v/GvpFWeBHmsoTe0ixeVt6vPi9NIittZDJjrz9arjBPeoRSnBQ=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		></script>
+		<div>
+			<p id="currentCounter"></p>
+			<button onclick="inCounter()">Increment Counter</button>
+			<button onclick="decCounter()">Decrement Counter</button>
+			<script>
+				let userAddress;
+				let ETH_CONTRACT;
+				window.onload = async () => {
+					if (window.ethereum !== 'undefined') {
+						alert('Meta mask is installed!');
+						const accounts = await window.ethereum.request({
+							method: 'eth_requestAccounts',
+						});
+						userAddress = accounts[0];
+						const web3 = new Web3(ethereum);
+
+						const abi = JSON.parse(`
+                        [
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "decrementCount",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "incrementCount",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "constant": false,
+            "inputs": [],
+            "name": "incrementWithOut",
+            "outputs": [],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "increment",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "name": "value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "decrement",
+            "type": "event"
+        },
+        {
+            "constant": true,
+            "inputs": [],
+            "name": "getCount",
+            "outputs": [
+                {
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ]
+    
+                        `);
+
+						ETH_CONTRACT = new web3.eth.Contract(
+							abi,
+							'0x5aE9d66eD5b50537EBCe7Ef8F5eF0a973f358803'
+						);
+						document.getElementById('currentCounter').innerText =
+							await ETH_CONTRACT.methods.getCount().call();
+						console.log(await ETH_CONTRACT.methods.getCount().call());
+					} else {
+						console.log('Meta mask not installed');
+					}
+				};
+				async function inCounter() {
+					console.log('incCounter');
+					await ETH_CONTRACT.methods.incrementCount().send({
+						from: userAddress,
+					});
+				}
+				async function decCounter() {
+					await ETH_CONTRACT.methods.decrementCount().send({
+						from: userAddress,
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
